@@ -1,7 +1,9 @@
 local Lighting = game:GetService("Lighting")
+local InsertService = game:GetService("InsertService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local CommunityAssets = require(ReplicatedStorage.Shared.CommunityAssets)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local Palette = require(ReplicatedStorage.Shared.Palette)
 local TicTacToeLogic = require(ReplicatedStorage.Shared.TicTacToeLogic)
@@ -102,6 +104,106 @@ local function addPromptToPart(part)
 	prompt.MaxActivationDistance = GameConfig.promptDistance
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = part
+end
+
+local function getCommunityGroup()
+	local group = workspace:FindFirstChild("CommunityFortressModels")
+
+	if not group then
+		group = Instance.new("Folder")
+		group.Name = "CommunityFortressModels"
+		group.Parent = workspace
+	end
+
+	return group
+end
+
+local function sanitizeCommunityModel(model)
+	local removedScripts = 0
+
+	for _, descendant in ipairs(model:GetDescendants()) do
+		if descendant:IsA("BaseScript") then
+			descendant:Destroy()
+			removedScripts += 1
+		elseif descendant:IsA("BasePart") then
+			descendant.Anchored = true
+		end
+	end
+
+	model:SetAttribute("CommunityScriptsRemoved", removedScripts)
+	model:SetAttribute("CommunityAssetSanitized", true)
+end
+
+local function loadCommunityAssets()
+	local group = getCommunityGroup()
+
+	for _, asset in ipairs(CommunityAssets) do
+		if not group:FindFirstChild(asset.name) then
+			local ok, inserted = pcall(function()
+				return InsertService:LoadAsset(asset.assetId)
+			end)
+
+			if ok and inserted then
+				inserted.Name = asset.name
+				inserted:SetAttribute("CreatorStoreAssetId", asset.assetId)
+				inserted:SetAttribute("CreatorStoreRole", asset.role)
+				inserted.Parent = group
+				sanitizeCommunityModel(inserted)
+			else
+				warn(("[Fortress TicTacToe] Could not load community asset %s (%s)"):format(asset.name, asset.assetId))
+			end
+		end
+	end
+
+	return group
+end
+
+local function placeModel(model, pivot, scale)
+	if not model or not model:IsA("Model") then
+		return nil
+	end
+
+	sanitizeCommunityModel(model)
+
+	if scale and model.ScaleTo then
+		model:ScaleTo(scale)
+	end
+
+	model:PivotTo(pivot)
+
+	return model
+end
+
+local function placeModelTopAt(model, pivot, scale, topY)
+	if not placeModel(model, pivot, scale) then
+		return nil
+	end
+
+	local boundsCFrame, boundsSize = model:GetBoundingBox()
+	local currentTopY = boundsCFrame.Position.Y + boundsSize.Y / 2
+	model:PivotTo(model:GetPivot() + Vector3.new(0, topY - currentTopY, 0))
+
+	return model
+end
+
+local function cloneCommunityModel(group, sourceName, cloneName, pivot, scale)
+	local existing = group:FindFirstChild(cloneName)
+
+	if existing and existing:IsA("Model") then
+		return placeModel(existing, pivot, scale)
+	end
+
+	local source = group:FindFirstChild(sourceName)
+
+	if not source or not source:IsA("Model") then
+		return nil
+	end
+
+	local clone = source:Clone()
+	clone.Name = cloneName
+	clone.Parent = group
+
+	return placeModel(clone, pivot, scale)
 end
 
 local function buildFortressShell()
@@ -228,6 +330,83 @@ local function buildDecor()
 	end
 end
 
+local function arrangeCommunityModels()
+	local group = loadCommunityAssets()
+
+	placeModel(group:FindFirstChild("Castle Wall Medieval Fortress Defense Tower"), CFrame.new(0, 14, -86), 1.25)
+	placeModel(
+		group:FindFirstChild("Portcullis Castle Gate Door Medieval Fortress"),
+		CFrame.new(0, 11.5, -73) * CFrame.Angles(0, math.rad(180), 0),
+		1.25
+	)
+	placeModelTopAt(
+		group:FindFirstChild("Dungeon Table Medieval Castle Fantasy Decor"),
+		CFrame.new(GameConfig.tablePosition),
+		2.5,
+		GameConfig.tablePosition.Y + 0.15
+	)
+	placeModel(
+		group:FindFirstChild("Medieval Chair Throne Castle Roleplay RP"),
+		CFrame.new(0, 2.4, -57) * CFrame.Angles(0, math.rad(180), 0),
+		1.4
+	)
+	placeModel(
+		group:FindFirstChild("Statue Sword Knight Armor Medieval Guard"),
+		CFrame.new(-28, 14.5, -52) * CFrame.Angles(0, math.rad(22), 0),
+		0.82
+	)
+	placeModel(
+		group:FindFirstChild("Wall Torch Flame Light Medieval Castle Prop"),
+		CFrame.new(-24, 7.5, -74) * CFrame.Angles(0, math.rad(180), 0),
+		1.4
+	)
+	placeModel(group:FindFirstChild("Brazier"), CFrame.new(-18, 2.2, -26), 1.35)
+
+	cloneCommunityModel(
+		group,
+		"Statue Sword Knight Armor Medieval Guard",
+		"Statue Sword Knight Armor Medieval Guard Right",
+		CFrame.new(28, 14.5, -52) * CFrame.Angles(0, math.rad(-22), 0),
+		0.82
+	)
+	cloneCommunityModel(
+		group,
+		"Wall Torch Flame Light Medieval Castle Prop",
+		"Wall Torch Flame Light Medieval Castle Prop Right",
+		CFrame.new(24, 7.5, -74) * CFrame.Angles(0, math.rad(180), 0),
+		1.4
+	)
+	cloneCommunityModel(
+		group,
+		"Wall Torch Flame Light Medieval Castle Prop",
+		"Wall Torch Flame Light Medieval Castle Prop Left Mid",
+		CFrame.new(-46, 7.5, -32) * CFrame.Angles(0, math.rad(90), 0),
+		1.2
+	)
+	cloneCommunityModel(
+		group,
+		"Wall Torch Flame Light Medieval Castle Prop",
+		"Wall Torch Flame Light Medieval Castle Prop Right Mid",
+		CFrame.new(46, 7.5, -32) * CFrame.Angles(0, math.rad(-90), 0),
+		1.2
+	)
+	cloneCommunityModel(group, "Brazier", "Brazier Right", CFrame.new(18, 2.2, -26), 1.35)
+	cloneCommunityModel(group, "Brazier", "Brazier Left Rear", CFrame.new(-34, 2.2, -62), 1.2)
+	cloneCommunityModel(group, "Brazier", "Brazier Right Rear", CFrame.new(34, 2.2, -62), 1.2)
+	cloneCommunityModel(
+		group,
+		"Medieval Chair Throne Castle Roleplay RP",
+		"Player Throne Chair",
+		CFrame.new(0, 2.4, -27),
+		1.15
+	)
+
+	group:SetAttribute("Source", "Creator Store free community models")
+	group:SetAttribute("Safety", "Embedded scripts removed at runtime")
+
+	return group
+end
+
 local function createSeat(name, position, rotationY, color)
 	local seat = Instance.new("Seat")
 	seat.Name = name
@@ -296,31 +475,71 @@ local function buildWarTable()
 		CFrame.new(center + Vector3.new(0, -3.3, 0)),
 		Palette.charcoal
 	)
-	local tableTop = makePart("FortressWarTable", Vector3.new(28, 1.4, 19), CFrame.new(center), Palette.bloodstone)
-	tableTop.Material = Enum.Material.WoodPlanks
-	addSurfaceText(tableTop, Enum.NormalId.Top, "COMMAND TABLE", Palette.gold, Enum.Font.GothamBlack)
-	addPromptToPart(tableTop)
-	addLight(tableTop, Palette.ember, 1.2, 22)
 
-	for _, offset in ipairs({
-		Vector3.new(-12, -2.8, -8),
-		Vector3.new(12, -2.8, -8),
-		Vector3.new(-12, -2.8, 8),
-		Vector3.new(12, -2.8, 8),
-	}) do
-		makePart(
-			"IronTableLeg",
-			Vector3.new(2.4, 5.5, 2.4),
-			CFrame.new(center + offset),
-			Palette.iron,
-			Enum.Material.Metal
+	local communityModels = workspace:FindFirstChild("CommunityFortressModels")
+	local communityTable = communityModels
+		and communityModels:FindFirstChild("Dungeon Table Medieval Castle Fantasy Decor")
+	local promptPart
+
+	if communityTable and communityTable:IsA("Model") then
+		for _, descendant in ipairs(communityTable:GetDescendants()) do
+			if descendant:IsA("BaseScript") then
+				descendant:Destroy()
+			elseif descendant:IsA("BasePart") then
+				descendant.Anchored = true
+			end
+		end
+
+		if communityTable.ScaleTo then
+			communityTable:ScaleTo(2.5)
+		end
+
+		communityTable:PivotTo(CFrame.new(center.X, center.Y, center.Z))
+
+		local boundsCFrame, boundsSize = communityTable:GetBoundingBox()
+		local desiredTopY = center.Y + 0.15
+		local currentTopY = boundsCFrame.Position.Y + boundsSize.Y / 2
+		communityTable:PivotTo(communityTable:GetPivot() + Vector3.new(0, desiredTopY - currentTopY, 0))
+
+		promptPart = makePart(
+			"WarTablePromptHitbox",
+			Vector3.new(18, 5, 15),
+			CFrame.new(center + Vector3.new(0, 1.2, 0)),
+			Palette.ember,
+			Enum.Material.Neon
 		)
+		promptPart.CanCollide = false
+		promptPart.Transparency = 1
+		addLight(promptPart, Palette.ember, 1.2, 22)
+	else
+		local tableTop = makePart("FortressWarTable", Vector3.new(28, 1.4, 19), CFrame.new(center), Palette.bloodstone)
+		tableTop.Material = Enum.Material.WoodPlanks
+		addSurfaceText(tableTop, Enum.NormalId.Top, "COMMAND TABLE", Palette.gold, Enum.Font.GothamBlack)
+		addLight(tableTop, Palette.ember, 1.2, 22)
+		promptPart = tableTop
+
+		for _, offset in ipairs({
+			Vector3.new(-12, -2.8, -8),
+			Vector3.new(12, -2.8, -8),
+			Vector3.new(-12, -2.8, 8),
+			Vector3.new(12, -2.8, 8),
+		}) do
+			makePart(
+				"IronTableLeg",
+				Vector3.new(2.4, 5.5, 2.4),
+				CFrame.new(center + offset),
+				Palette.iron,
+				Enum.Material.Metal
+			)
+		end
 	end
+
+	addPromptToPart(promptPart)
 
 	local boardBase = makePart(
 		"PhysicalBoardBase",
 		Vector3.new(13.5, 0.55, 13.5),
-		CFrame.new(center + Vector3.new(0, 1, 0)),
+		CFrame.new(center + Vector3.new(0, 1.1, 0)),
 		Palette.obsidian
 	)
 	boardBase.Material = Enum.Material.SmoothPlastic
@@ -335,7 +554,7 @@ local function buildWarTable()
 			local cell = makePart(
 				("BoardCell%d"):format(index),
 				Vector3.new(3.35, 0.25, 3.35),
-				CFrame.new(center + Vector3.new(startX + (column - 1) * spacing, 1.42, startZ + (row - 1) * spacing)),
+				CFrame.new(center + Vector3.new(startX + (column - 1) * spacing, 1.52, startZ + (row - 1) * spacing)),
 				Palette.deepCrimson,
 				Enum.Material.Neon
 			)
@@ -360,7 +579,7 @@ local function buildWarTable()
 	end
 
 	platform.Transparency = 0.02
-	return tableTop
+	return promptPart
 end
 
 local function updatePhysicalBoard(board, line, winner)
@@ -395,6 +614,7 @@ end
 
 buildFortressShell()
 buildDecor()
+arrangeCommunityModels()
 buildWarTable()
 
 local function getOrCreateStat(parent, name)

@@ -1,4 +1,5 @@
 local GameConfig = require("../src/shared/GameConfig")
+local CommunityAssets = require("../src/shared/CommunityAssets")
 local Palette = require("../src/shared/Palette")
 
 local tests = {}
@@ -57,6 +58,25 @@ test("declares a broad dark red palette", function()
 	for _, key in ipairs(required) do
 		assertTruthy(Palette[key] ~= nil, ("missing palette color %s"):format(key))
 	end
+end)
+
+test("declares curated creator store community models", function()
+	assertTruthy(#CommunityAssets >= 5, "should include a useful community model set")
+
+	local roles = {}
+
+	for _, asset in ipairs(CommunityAssets) do
+		assertTruthy(type(asset.assetId) == "number", "asset id should be numeric")
+		assertTruthy(asset.assetId > 0, "asset id should be positive")
+		assertTruthy(asset.name and asset.name ~= "", "asset needs display name")
+		assertTruthy(asset.role and asset.role ~= "", "asset needs role")
+		roles[asset.role] = true
+	end
+
+	assertTruthy(roles.gate, "community set should include a gate")
+	assertTruthy(roles.table, "community set should include a table")
+	assertTruthy(roles.throne, "community set should include throne/chair dressing")
+	assertTruthy(roles.torch or roles.brazier, "community set should include lighting props")
 end)
 
 local passed = 0

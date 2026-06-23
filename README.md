@@ -43,6 +43,12 @@ rojo build -o /tmp/fortress-tictactoe-game.rbxlx
 
 You spawn in a dark red fortress hall. Walk to the war table, press `E`, and play TicTacToe against the seated AI commander.
 
+## Community Models
+
+The game uses a curated set of free Creator Store models for the fortress gate, wall, table, throne, torches, braziers, and guard statues. Their asset IDs live in `src/shared/CommunityAssets.luau`.
+
+At runtime the server loads them with `InsertService`, removes embedded scripts, anchors the geometry, and places them under `Workspace.CommunityFortressModels`. If a Creator Store asset cannot load, the source-owned procedural fortress pieces still build so the game remains playable.
+
 ## Theme Palette
 
 - Obsidian: `#10090B`
