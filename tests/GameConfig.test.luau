@@ -61,7 +61,7 @@ test("declares a broad dark red palette", function()
 end)
 
 test("declares curated creator store community models", function()
-	assertTruthy(#CommunityAssets >= 5, "should include a useful community model set")
+	assertTruthy(#CommunityAssets >= 10, "should include a full community model set")
 
 	local roles = {}
 
@@ -74,6 +74,10 @@ test("declares curated creator store community models", function()
 	end
 
 	assertTruthy(roles.gate, "community set should include a gate")
+	assertTruthy(roles.village_buildings, "community set should include large buildings")
+	assertTruthy(roles.fortress_building, "community set should include fortress buildings")
+	assertTruthy(roles.castle_interior_pack, "community set should include interior/castle pack dressing")
+	assertTruthy(roles.furniture_pack, "community set should include furniture pack dressing")
 	assertTruthy(roles.table, "community set should include a table")
 	assertTruthy(roles.throne, "community set should include throne/chair dressing")
 	assertTruthy(roles.torch or roles.brazier, "community set should include lighting props")

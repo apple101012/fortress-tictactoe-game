@@ -45,9 +45,11 @@ You spawn in a dark red fortress hall. Walk to the war table, press `E`, and pla
 
 ## Community Models
 
-The game uses a curated set of free Creator Store models for the fortress gate, wall, table, throne, torches, braziers, and guard statues. Their asset IDs live in `src/shared/CommunityAssets.luau`.
+The game uses a curated set of free Creator Store models for the large castle/village backdrop, fortress buildings, dungeon/interior pack, fortress gate, walls, table, throne chairs, furniture pack, torches, braziers, and guard statues. Their asset IDs live in `src/shared/CommunityAssets.luau`.
 
 At runtime the server loads them with `InsertService`, removes embedded scripts, anchors the geometry, and places them under `Workspace.CommunityFortressModels`. If a Creator Store asset cannot load, the source-owned procedural fortress pieces still build so the game remains playable.
+
+The visual setting is community-model driven. Source-created parts are limited to reliable gameplay helpers: floor, spawn pad, invisible prompt hitbox, and the live TicTacToe board overlay.
 
 ## Theme Palette
 

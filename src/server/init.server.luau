@@ -134,6 +134,29 @@ local function sanitizeCommunityModel(model)
 	model:SetAttribute("CommunityAssetSanitized", true)
 end
 
+local function normalizeCommunityContainer(container, desiredName, group)
+	if not container then
+		return nil
+	end
+
+	if container:IsA("Model") then
+		container.Name = desiredName
+		container.Parent = group
+		return container
+	end
+
+	local wrapper = Instance.new("Model")
+	wrapper.Name = desiredName
+	wrapper.Parent = group
+
+	for _, child in ipairs(container:GetChildren()) do
+		child.Parent = wrapper
+	end
+
+	container:Destroy()
+	return wrapper
+end
+
 local function loadCommunityAssets()
 	local group = getCommunityGroup()
 
@@ -144,11 +167,13 @@ local function loadCommunityAssets()
 			end)
 
 			if ok and inserted then
-				inserted.Name = asset.name
-				inserted:SetAttribute("CreatorStoreAssetId", asset.assetId)
-				inserted:SetAttribute("CreatorStoreRole", asset.role)
-				inserted.Parent = group
-				sanitizeCommunityModel(inserted)
+				local model = normalizeCommunityContainer(inserted, asset.name, group)
+
+				if model then
+					model:SetAttribute("CreatorStoreAssetId", asset.assetId)
+					model:SetAttribute("CreatorStoreRole", asset.role)
+					sanitizeCommunityModel(model)
+				end
 			else
 				warn(("[Fortress TicTacToe] Could not load community asset %s (%s)"):format(asset.name, asset.assetId))
 			end
@@ -156,6 +181,16 @@ local function loadCommunityAssets()
 	end
 
 	return group
+end
+
+local function getCommunityModel(group, name)
+	local existing = group:FindFirstChild(name)
+
+	if not existing then
+		return nil
+	end
+
+	return normalizeCommunityContainer(existing, name, group)
 end
 
 local function placeModel(model, pivot, scale)
@@ -193,7 +228,7 @@ local function cloneCommunityModel(group, sourceName, cloneName, pivot, scale)
 		return placeModel(existing, pivot, scale)
 	end
 
-	local source = group:FindFirstChild(sourceName)
+	local source = getCommunityModel(group, sourceName)
 
 	if not source or not source:IsA("Model") then
 		return nil
@@ -208,56 +243,13 @@ end
 
 local function buildFortressShell()
 	local halfSize = GameConfig.arenaHalfSize
-	makePart("ObsidianStoneFloor", Vector3.new(halfSize * 2, 2, halfSize * 2), CFrame.new(0, -1, 0), Palette.obsidian)
-
-	for _, data in ipairs({
-		{ "NorthWall", Vector3.new(halfSize * 2, 28, 5), CFrame.new(0, 13, -halfSize), 0 },
-		{ "SouthWall", Vector3.new(halfSize * 2, 24, 5), CFrame.new(0, 11, halfSize), 0 },
-		{ "EastWall", Vector3.new(5, 26, halfSize * 2), CFrame.new(halfSize, 12, 0), 0 },
-		{ "WestWall", Vector3.new(5, 26, halfSize * 2), CFrame.new(-halfSize, 12, 0), 0 },
-	}) do
-		makePart(data[1], data[2], data[3], Palette.bloodstone, Enum.Material.Slate)
-	end
-
-	for _, x in ipairs({ -66, -22, 22, 66 }) do
-		makePart(
-			("NorthBattlement%d"):format(x),
-			Vector3.new(12, 7, 6),
-			CFrame.new(x, 29, -82),
-			Palette.deepCrimson,
-			Enum.Material.Slate
-		)
-		makePart(
-			("SouthBattlement%d"):format(x),
-			Vector3.new(12, 7, 6),
-			CFrame.new(x, 25, 82),
-			Palette.deepCrimson,
-			Enum.Material.Slate
-		)
-	end
-
-	for _, point in ipairs({
-		Vector3.new(-72, 11, -72),
-		Vector3.new(72, 11, -72),
-		Vector3.new(-72, 11, 72),
-		Vector3.new(72, 11, 72),
-	}) do
-		makePart(
-			("FortressTower%d%d"):format(point.X, point.Z),
-			Vector3.new(15, 24, 15),
-			CFrame.new(point),
-			Palette.deepCrimson,
-			Enum.Material.Brick
-		)
-		local crown = makePart(
-			("FortressTowerCrown%d%d"):format(point.X, point.Z),
-			Vector3.new(18, 5, 18),
-			CFrame.new(point + Vector3.new(0, 14.5, 0)),
-			Palette.crimson,
-			Enum.Material.Slate
-		)
-		addLight(crown, Palette.ember, 0.5, 22)
-	end
+	local floor = makePart(
+		"ObsidianCourtyardFloor",
+		Vector3.new(halfSize * 2.35, 2, halfSize * 2.35),
+		CFrame.new(0, -1, -22),
+		Palette.obsidian
+	)
+	floor.Material = Enum.Material.Slate
 end
 
 local function buildDecor()
@@ -270,97 +262,73 @@ local function buildDecor()
 	spawn.Material = Enum.Material.Neon
 	spawn.Parent = arena
 	addLight(spawn, Palette.ember, 1.6, 26)
-
-	for index = 1, 8 do
-		local z = 14 - index * 7
-		local runner = makePart(
-			("CrimsonRunway%d"):format(index),
-			Vector3.new(10, 0.22, 4.4),
-			CFrame.new(0, 0.25, z),
-			index % 2 == 0 and Palette.bloodstone or Palette.charcoal,
-			Enum.Material.SmoothPlastic
-		)
-		local trim = makePart(
-			("GoldRunwayTrim%d"):format(index),
-			Vector3.new(0.5, 0.28, 4.6),
-			CFrame.new(0, 0.5, z),
-			Palette.gold,
-			Enum.Material.Neon
-		)
-		addLight(trim, Palette.gold, 0.25, 9)
-		runner.Transparency = 0.02
-	end
-
-	local titlePanel =
-		makePart("FortressTitlePanel", Vector3.new(44, 9, 1), CFrame.new(0, 12, -78), Palette.deepCrimson)
-	addSurfaceText(titlePanel, Enum.NormalId.Front, "FORTRESS TIC TAC TOE", Palette.bone, Enum.Font.GothamBlack)
-
-	local promptPanel = makePart("PromptPanel", Vector3.new(36, 6, 1), CFrame.new(0, 7, -8), Palette.bloodstone)
-	addSurfaceText(
-		promptPanel,
-		Enum.NormalId.Front,
-		"WALK TO THE WAR TABLE  |  PRESS E",
-		Palette.gold,
-		Enum.Font.GothamBold
-	)
-
-	for index, x in ipairs({ -48, -32, 32, 48 }) do
-		local brazier = makePart(
-			("BrazierBase%d"):format(index),
-			Vector3.new(4.5, 2.8, 4.5),
-			CFrame.new(x, 1.4, -22),
-			Palette.iron,
-			Enum.Material.Metal
-		)
-		local flame = makePart(
-			("EmberFlame%d"):format(index),
-			Vector3.new(3.2, 4.2, 3.2),
-			CFrame.new(x, 5, -22),
-			index % 2 == 0 and Palette.ember or Palette.gold,
-			Enum.Material.Neon
-		)
-		flame.Shape = Enum.PartType.Ball
-		addLight(flame, Palette.ember, 1.8, 32)
-		brazier.Transparency = 0
-	end
-
-	for _, x in ipairs({ -24, -12, 12, 24 }) do
-		local banner = makePart("HangingBanner", Vector3.new(7, 13, 0.5), CFrame.new(x, 15, -80), Palette.crimson)
-		addSurfaceText(banner, Enum.NormalId.Front, "X  O", Palette.gold, Enum.Font.GothamBlack)
-	end
 end
 
 local function arrangeCommunityModels()
 	local group = loadCommunityAssets()
 
-	placeModel(group:FindFirstChild("Castle Wall Medieval Fortress Defense Tower"), CFrame.new(0, 14, -86), 1.25)
 	placeModel(
-		group:FindFirstChild("Portcullis Castle Gate Door Medieval Fortress"),
+		getCommunityModel(group, "Medieval Village Set - Castle Town Buildings"),
+		CFrame.new(0, 13, -112) * CFrame.Angles(0, math.rad(180), 0),
+		0.36
+	)
+	placeModel(
+		getCommunityModel(group, "Medieval Castle Village Fortress Fantasy Building"),
+		CFrame.new(-48, 5, -58) * CFrame.Angles(0, math.rad(28), 0),
+		0.92
+	)
+	placeModel(
+		getCommunityModel(group, "Synty Dungeon Pack Cave Castle Medieval Interior"),
+		CFrame.new(76, 9, -42) * CFrame.Angles(0, math.rad(-90), 0),
+		0.17
+	)
+	placeModel(getCommunityModel(group, "Castle Wall Medieval Fortress Defense Tower"), CFrame.new(0, 14, -86), 1.25)
+	placeModel(
+		getCommunityModel(group, "Portcullis Castle Gate Door Medieval Fortress"),
 		CFrame.new(0, 11.5, -73) * CFrame.Angles(0, math.rad(180), 0),
 		1.25
 	)
+	cloneCommunityModel(
+		group,
+		"Castle Wall Medieval Fortress Defense Tower",
+		"Castle Wall Medieval Fortress Defense Tower Left",
+		CFrame.new(-58, 14, -45) * CFrame.Angles(0, math.rad(90), 0),
+		0.95
+	)
+	cloneCommunityModel(
+		group,
+		"Castle Wall Medieval Fortress Defense Tower",
+		"Castle Wall Medieval Fortress Defense Tower Right",
+		CFrame.new(58, 14, -45) * CFrame.Angles(0, math.rad(-90), 0),
+		0.95
+	)
 	placeModelTopAt(
-		group:FindFirstChild("Dungeon Table Medieval Castle Fantasy Decor"),
+		getCommunityModel(group, "Dungeon Table Medieval Castle Fantasy Decor"),
 		CFrame.new(GameConfig.tablePosition),
 		2.5,
 		GameConfig.tablePosition.Y + 0.15
 	)
 	placeModel(
-		group:FindFirstChild("Medieval Chair Throne Castle Roleplay RP"),
+		getCommunityModel(group, "Medieval Chair Throne Castle Roleplay RP"),
 		CFrame.new(0, 2.4, -57) * CFrame.Angles(0, math.rad(180), 0),
 		1.4
 	)
 	placeModel(
-		group:FindFirstChild("Statue Sword Knight Armor Medieval Guard"),
+		getCommunityModel(group, "Medieval Furniture Pack Castle Kingdom Vibe RP"),
+		CFrame.new(-21, 2.4, -40) * CFrame.Angles(0, math.rad(35), 0),
+		1.7
+	)
+	placeModel(
+		getCommunityModel(group, "Statue Sword Knight Armor Medieval Guard"),
 		CFrame.new(-28, 14.5, -52) * CFrame.Angles(0, math.rad(22), 0),
 		0.82
 	)
 	placeModel(
-		group:FindFirstChild("Wall Torch Flame Light Medieval Castle Prop"),
+		getCommunityModel(group, "Wall Torch Flame Light Medieval Castle Prop"),
 		CFrame.new(-24, 7.5, -74) * CFrame.Angles(0, math.rad(180), 0),
 		1.4
 	)
-	placeModel(group:FindFirstChild("Brazier"), CFrame.new(-18, 2.2, -26), 1.35)
+	placeModel(getCommunityModel(group, "Brazier"), CFrame.new(-18, 2.2, -26), 1.35)
 
 	cloneCommunityModel(
 		group,
@@ -400,6 +368,20 @@ local function arrangeCommunityModels()
 		CFrame.new(0, 2.4, -27),
 		1.15
 	)
+	cloneCommunityModel(
+		group,
+		"Medieval Furniture Pack Castle Kingdom Vibe RP",
+		"Medieval Furniture Pack Right Decor",
+		CFrame.new(21, 2.4, -40) * CFrame.Angles(0, math.rad(-35), 0),
+		1.7
+	)
+	cloneCommunityModel(
+		group,
+		"Medieval Castle Village Fortress Fantasy Building",
+		"Medieval Castle Village Fortress Fantasy Building Right",
+		CFrame.new(48, 5, -58) * CFrame.Angles(0, math.rad(-28), 0),
+		0.92
+	)
 
 	group:SetAttribute("Source", "Creator Store free community models")
 	group:SetAttribute("Safety", "Embedded scripts removed at runtime")
@@ -407,75 +389,8 @@ local function arrangeCommunityModels()
 	return group
 end
 
-local function createSeat(name, position, rotationY, color)
-	local seat = Instance.new("Seat")
-	seat.Name = name
-	seat.Anchored = true
-	seat.CFrame = CFrame.new(position) * CFrame.Angles(0, math.rad(rotationY), 0)
-	seat.Color = color
-	seat.Material = Enum.Material.SmoothPlastic
-	seat.Size = Vector3.new(5, 1, 5)
-	seat.Parent = arena
-
-	local backOffset = rotationY == 180 and Vector3.new(0, 3.1, 3.1) or Vector3.new(0, 3.1, -3.1)
-	local back = makePart(
-		("%sBack"):format(name),
-		Vector3.new(5.4, 6, 0.75),
-		CFrame.new(position + backOffset) * CFrame.Angles(0, math.rad(rotationY), 0),
-		color:Lerp(Palette.obsidian, 0.22)
-	)
-
-	return seat, back
-end
-
-local function createAICommander(position)
-	local model = Instance.new("Model")
-	model.Name = "SeatedAICommander"
-	model.Parent = arena
-
-	local function figurePart(name, size, offset, color, material)
-		local part = Instance.new("Part")
-		part.Name = name
-		part.Anchored = true
-		part.Color = color
-		part.Material = material or Enum.Material.SmoothPlastic
-		part.Position = position + offset
-		part.Size = size
-		part.TopSurface = Enum.SurfaceType.Smooth
-		part.BottomSurface = Enum.SurfaceType.Smooth
-		part.Parent = model
-
-		return part
-	end
-
-	figurePart("TorsoArmor", Vector3.new(3.2, 4, 1.5), Vector3.new(0, 3.8, 0), Palette.iron, Enum.Material.Metal)
-	figurePart("Helmet", Vector3.new(2.4, 2.1, 2.4), Vector3.new(0, 6.9, 0), Palette.darkGold, Enum.Material.Metal)
-	figurePart("LeftArm", Vector3.new(0.9, 3.2, 0.9), Vector3.new(-2.2, 4, -0.2), Palette.crimson)
-	figurePart("RightArm", Vector3.new(0.9, 3.2, 0.9), Vector3.new(2.2, 4, -0.2), Palette.crimson)
-	figurePart("LeftLeg", Vector3.new(1, 2.7, 1), Vector3.new(-0.8, 1.5, -1), Palette.iron, Enum.Material.Metal)
-	figurePart("RightLeg", Vector3.new(1, 2.7, 1), Vector3.new(0.8, 1.5, -1), Palette.iron, Enum.Material.Metal)
-
-	local crownGlow = figurePart(
-		"CommanderCrownGlow",
-		Vector3.new(2.8, 0.35, 2.8),
-		Vector3.new(0, 8.2, 0),
-		Palette.gold,
-		Enum.Material.Neon
-	)
-	addLight(crownGlow, Palette.gold, 0.8, 14)
-
-	return model
-end
-
 local function buildWarTable()
 	local center = GameConfig.tablePosition
-	local platform = makePart(
-		"WarTablePlatform",
-		Vector3.new(34, 0.6, 25),
-		CFrame.new(center + Vector3.new(0, -3.3, 0)),
-		Palette.charcoal
-	)
-
 	local communityModels = workspace:FindFirstChild("CommunityFortressModels")
 	local communityTable = communityModels
 		and communityModels:FindFirstChild("Dungeon Table Medieval Castle Fantasy Decor")
@@ -563,22 +478,6 @@ local function buildWarTable()
 		end
 	end
 
-	createSeat("PlayerCommanderSeat", center + Vector3.new(0, -3, 13), 180, Palette.crimson)
-	local aiSeat = createSeat("AICommanderSeat", center + Vector3.new(0, -3, -13), 0, Palette.iron)
-	aiSeat.Disabled = true
-	createAICommander(aiSeat.Position + Vector3.new(0, 0.2, 1.2))
-
-	for _, x in ipairs({ -18, 18 }) do
-		local sideTable = makePart(
-			"SideStrategyTable",
-			Vector3.new(9, 0.8, 7),
-			CFrame.new(center + Vector3.new(x, -1.4, 4)),
-			Palette.deepCrimson
-		)
-		addSurfaceText(sideTable, Enum.NormalId.Top, "RANKED\nSOON", Palette.bone, Enum.Font.GothamBold)
-	end
-
-	platform.Transparency = 0.02
 	return promptPart
 end
 
