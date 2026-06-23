@@ -17,6 +17,7 @@ for _, oldName in ipairs({
 	"CoinDashMap",
 	"DeskTicTacToeMap",
 	"FortressTitlePanel",
+	"FortressDesignPreview",
 	"PromptPanel",
 	"FortressWarTable",
 	"PlayerCommanderSeat",
@@ -173,7 +174,7 @@ local function addPromptToPart(part)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = GameConfig.promptName
 	prompt.ActionText = "Challenge"
-	prompt.ObjectText = "Fortress War Table"
+	prompt.ObjectText = "City Park Table"
 	prompt.HoldDuration = 0
 	prompt.KeyboardKeyCode = Enum.KeyCode.E
 	prompt.MaxActivationDistance = GameConfig.promptDistance
@@ -318,45 +319,98 @@ end
 
 local function buildFortressShell()
 	local halfSize = GameConfig.arenaHalfSize
-	local floor = makePart(
-		"ObsidianCourtyardFloor",
+	makePart(
+		"CityParkGrassFloor",
 		Vector3.new(halfSize * 2.35, 2, halfSize * 2.35),
-		CFrame.new(0, -1, -22),
-		Color3.fromRGB(64, 54, 53)
+		CFrame.new(0, -1, 0),
+		Color3.fromRGB(76, 156, 74),
+		Enum.Material.Grass
 	)
-	floor.Material = Enum.Material.Cobblestone
 
-	local runway = makePart(
-		"CrimsonRunway",
-		Vector3.new(18, 0.16, 66),
-		CFrame.new(0, 0.08, -5),
-		Palette.deepCrimson,
-		Enum.Material.Fabric
+	local road = makePart(
+		"CityAsphaltRoad",
+		Vector3.new(34, 0.2, halfSize * 2.2),
+		CFrame.new(0, 0.08, 0),
+		Color3.fromRGB(42, 45, 48),
+		Enum.Material.Asphalt
 	)
-	runway.CanCollide = false
+	road.CanCollide = false
 
-	for _, x in ipairs({ -9.6, 9.6 }) do
-		local trim = makePart(
-			"GoldRunwayTrim",
-			Vector3.new(0.55, 0.2, 66),
-			CFrame.new(x, 0.15, -5),
-			Palette.gold,
-			Enum.Material.Metal
+	for _, x in ipairs({ -25, 25 }) do
+		local sidewalk = makePart(
+			"ConcreteSidewalk",
+			Vector3.new(12, 0.26, halfSize * 2.2),
+			CFrame.new(x, 0.16, 0),
+			Color3.fromRGB(198, 203, 207),
+			Enum.Material.Concrete
 		)
-		trim.CanCollide = false
+		sidewalk.CanCollide = false
 	end
 
-	for index, z in ipairs({ 18, 6, -6, -18, -30 }) do
-		for _, x in ipairs({ -12.5, 12.5 }) do
-			local marker = makePart(
-				("RunwayEmberLight%d"):format(index),
-				Vector3.new(1.8, 0.25, 1.8),
-				CFrame.new(x, 0.3, z),
-				Palette.ember,
+	for _, z in ipairs({ -42, -18, 6, 30, 54 }) do
+		makePart(
+			"CrosswalkStripe",
+			Vector3.new(27, 0.1, 1.1),
+			CFrame.new(0, 0.27, z),
+			Color3.fromRGB(242, 242, 232),
+			Enum.Material.SmoothPlastic
+		).CanCollide =
+			false
+	end
+
+	for index, z in ipairs({ -56, -30, -4, 22, 48 }) do
+		for _, x in ipairs({ -33, 33 }) do
+			local pole = makePart(
+				("ModernStreetLightPole%d"):format(index),
+				Vector3.new(0.7, 11, 0.7),
+				CFrame.new(x, 5.55, z),
+				Color3.fromRGB(62, 68, 74),
+				Enum.Material.Metal
+			)
+			local lamp = makePart(
+				("ModernStreetLightLamp%d"):format(index),
+				Vector3.new(2.2, 1, 2.2),
+				CFrame.new(x, 11.4, z),
+				Color3.fromRGB(255, 244, 188),
 				Enum.Material.Neon
 			)
-			marker.CanCollide = false
-			addLight(marker, Palette.ember, 1.25, 18)
+			pole.CanCollide = false
+			lamp.CanCollide = false
+			addLight(lamp, Color3.fromRGB(255, 244, 188), 1.4, 24)
+		end
+	end
+
+	local buildingSpecs = {
+		{ -58, -44, 18, 28, 22, Color3.fromRGB(72, 103, 128) },
+		{ 58, -42, 20, 38, 20, Color3.fromRGB(88, 110, 126) },
+		{ -60, -5, 22, 48, 24, Color3.fromRGB(58, 86, 112) },
+		{ 60, 4, 18, 34, 18, Color3.fromRGB(96, 111, 128) },
+		{ -58, 40, 24, 32, 22, Color3.fromRGB(76, 94, 118) },
+		{ 58, 42, 22, 44, 24, Color3.fromRGB(62, 91, 125) },
+	}
+
+	for index, spec in ipairs(buildingSpecs) do
+		local x, z, width, height, depth, color = table.unpack(spec)
+		local building = makePart(
+			("ModernCityBuilding%d"):format(index),
+			Vector3.new(width, height, depth),
+			CFrame.new(x, height / 2, z),
+			color,
+			Enum.Material.Glass
+		)
+		building.Reflectance = 0.08
+
+		for y = 1, math.floor(height / 8) do
+			for _, sideX in ipairs({ -1, 1 }) do
+				local window = makePart(
+					("CityWindow%d"):format(index),
+					Vector3.new(0.12, 2.2, 2.4),
+					CFrame.new(x + sideX * (width / 2 + 0.08), y * 7, z),
+					Color3.fromRGB(190, 226, 255),
+					Enum.Material.Neon
+				)
+				window.CanCollide = false
+			end
 		end
 	end
 end
@@ -376,6 +430,51 @@ end
 local function arrangeCommunityModels()
 	local group = loadCommunityAssets()
 
+	for index, child in ipairs(group:GetChildren()) do
+		if child:IsA("Model") then
+			placeModel(child, CFrame.new((index % 8) * 16 - 56, -190 - index * 4, 0), 1)
+		end
+	end
+
+	placeModelTopAt(
+		getCommunityModel(group, "Wooden Table Medieval Furniture Dining Feast"),
+		CFrame.new(GameConfig.tablePosition) * CFrame.Angles(0, math.rad(180), 0),
+		1.35,
+		GameConfig.tablePosition.Y + 0.1
+	)
+	placeModelTopAt(
+		getCommunityModel(group, "Old Wooden Chair Classic Rustic Furniture Farmhou"),
+		CFrame.new(GameConfig.tablePosition + Vector3.new(0, 0, 12.8)),
+		1.55,
+		GameConfig.tablePosition.Y - 0.35
+	)
+	cloneCommunityModel(
+		group,
+		"Old Wooden Chair Classic Rustic Furniture Farmhou",
+		"Creator Store AI Chair",
+		CFrame.new(GameConfig.tablePosition + Vector3.new(0, 0, -12.8)) * CFrame.Angles(0, math.rad(180), 0),
+		1.55
+	)
+	placeModelTopAt(
+		getCommunityModel(group, "Medieval Furniture Set Table Chair Decor"),
+		CFrame.new(GameConfig.tablePosition + Vector3.new(24, 0, 0)) * CFrame.Angles(0, math.rad(-24), 0),
+		0.55,
+		GameConfig.tablePosition.Y + 0.15
+	)
+	placeModelTopAt(
+		getCommunityModel(group, "Large Dinning Set"),
+		CFrame.new(GameConfig.tablePosition + Vector3.new(-24, 0, 0)) * CFrame.Angles(0, math.rad(24), 0),
+		0.72,
+		GameConfig.tablePosition.Y
+	)
+
+	group:SetAttribute("Source", "Creator Store free modern city table and chair models")
+	group:SetAttribute("Safety", "Embedded scripts removed at runtime")
+	group:SetAttribute("Theme", "Modern city park")
+
+	return group
+
+	--[[
 	placeModel(
 		getCommunityModel(group, "Medieval Village Set - Castle Town Buildings"),
 		CFrame.new(0, 13, -72) * CFrame.Angles(0, math.rad(180), 0),
@@ -549,6 +648,7 @@ local function arrangeCommunityModels()
 	group:SetAttribute("Safety", "Embedded scripts removed at runtime")
 
 	return group
+]]
 end
 
 local function buildWarTable()
@@ -556,7 +656,8 @@ local function buildWarTable()
 	local communityModels = workspace:FindFirstChild("CommunityFortressModels")
 	local communityTable = communityModels
 		and (
-			communityModels:FindFirstChild("Ornate War Council Table")
+			communityModels:FindFirstChild("Wooden Table Medieval Furniture Dining Feast")
+			or communityModels:FindFirstChild("Ornate War Council Table")
 			or communityModels:FindFirstChild("WAR MAP TABLE")
 			or communityModels:FindFirstChild("Dungeon Table Medieval Castle Fantasy Decor")
 		)
@@ -572,8 +673,9 @@ local function buildWarTable()
 		end
 
 		if communityTable.ScaleTo then
-			local tableScale = if communityTable.Name == "Ornate War Council Table"
-				then 1.25
+			local tableScale = if communityTable.Name == "Wooden Table Medieval Furniture Dining Feast"
+				then 1.35
+				elseif communityTable.Name == "Ornate War Council Table" then 1.25
 				elseif communityTable.Name == "WAR MAP TABLE" then 2.05
 				else 2.5
 			communityTable:ScaleTo(tableScale)
@@ -582,7 +684,10 @@ local function buildWarTable()
 		communityTable:PivotTo(CFrame.new(center.X, center.Y, center.Z))
 
 		local boundsCFrame, boundsSize = communityTable:GetBoundingBox()
-		local tableTopOffset = if communityTable.Name == "Ornate War Council Table" then 0.35 else 0.15
+		local tableTopOffset = if communityTable.Name == "Wooden Table Medieval Furniture Dining Feast"
+			then 0.1
+			elseif communityTable.Name == "Ornate War Council Table" then 0.35
+			else 0.15
 		local desiredTopY = center.Y + tableTopOffset
 		local currentTopY = boundsCFrame.Position.Y + boundsSize.Y / 2
 		communityTable:PivotTo(communityTable:GetPivot() + Vector3.new(0, desiredTopY - currentTopY, 0))

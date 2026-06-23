@@ -106,7 +106,7 @@ addStroke(hintBar, Palette.gold, 1, 0.18)
 
 local hintLabel = makeLabel(
 	hintBar,
-	"Walk to the fortress war table and press E.",
+	"Walk to the city park table and press E.",
 	UDim2.fromOffset(16, 6),
 	UDim2.new(1, -32, 1, -12),
 	Enum.Font.GothamBold,
@@ -468,5 +468,5 @@ updateDifficultyButtons()
 applyState({
 	board = TicTacToeLogic.createBoard(),
 	difficulty = currentDifficulty,
-	status = "Walk to the fortress war table and press E.",
+	status = "Walk to the city park table and press E.",
 })
