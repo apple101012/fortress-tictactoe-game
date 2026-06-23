@@ -1,0 +1,17 @@
+# Built Roblox place files
+/fortress-tictactoe-game.rbxlx
+/fortress-tictactoe-game.rbxl
+
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock
+
+# Rojo outputs
+sourcemap.json
+rojo-serve.log
+.rojo-server.pid
+
+# Execute task memory
+CURRENT.md
+CHANGELOG.md
+DECISION_LOG.md
