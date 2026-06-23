@@ -38,10 +38,18 @@ end)
 
 test("uses unique runtime names", function()
 	assertTruthy(GameConfig.arenaName ~= "", "arena name")
+	assertTruthy(GameConfig.gameplayFolderName ~= "", "gameplay folder name")
 	assertTruthy(GameConfig.promptName ~= "", "prompt name")
 	assertTruthy(GameConfig.remoteName ~= "", "remote name")
 	assertTruthy(GameConfig.spawnName ~= "", "spawn name")
 	assertTruthy(GameConfig.arenaName ~= GameConfig.remoteName, "runtime names should not collide")
+	assertTruthy(GameConfig.arenaName ~= GameConfig.gameplayFolderName, "visual and gameplay folders should differ")
+end)
+
+test("positions gameplay board above the community table", function()
+	assertTruthy(GameConfig.boardSize >= 12, "board should be large enough to read")
+	assertTruthy(GameConfig.boardCenterOffset.y > 0, "board should sit above the table center")
+	assertTruthy(GameConfig.boardCellOffsetY > GameConfig.boardCenterOffset.y, "cells should sit above board base")
 end)
 
 test("declares a broad dark red palette", function()

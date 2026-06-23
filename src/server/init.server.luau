@@ -10,7 +10,20 @@ local TicTacToeLogic = require(ReplicatedStorage.Shared.TicTacToeLogic)
 
 print(("[Fortress TicTacToe] Server running for %s"):format(GameConfig.gameName))
 
-for _, oldName in ipairs({ GameConfig.arenaName, "TicTacToeArena", "CoinDashMap", "DeskTicTacToeMap" }) do
+for _, oldName in ipairs({
+	GameConfig.arenaName,
+	GameConfig.gameplayFolderName,
+	"TicTacToeArena",
+	"CoinDashMap",
+	"DeskTicTacToeMap",
+	"FortressTitlePanel",
+	"PromptPanel",
+	"FortressWarTable",
+	"PlayerCommanderSeat",
+	"AICommanderSeat",
+	"SeatedAICommander",
+	"SideStrategyTable",
+}) do
 	local oldMap = workspace:FindFirstChild(oldName)
 
 	if oldMap then
@@ -27,7 +40,7 @@ if not gameFunction then
 end
 
 local arena = Instance.new("Folder")
-arena.Name = GameConfig.arenaName
+arena.Name = GameConfig.gameplayFolderName
 arena.Parent = workspace
 
 local sessions = {}
@@ -56,6 +69,54 @@ local function makePart(name, size, cframe, color, material)
 	part.Parent = arena
 
 	return part
+end
+
+local function removeOldGeneratedParts()
+	local oldPrefixes = {
+		"BrazierBase",
+		"Castle Wall Medieval Fortress Defense Tower Left",
+		"Castle Wall Medieval Fortress Defense Tower Right",
+		"CrimsonRunway",
+		"EmberFlame",
+		"FortressTower",
+		"GoldRunwayTrim",
+		"HangingBanner",
+		"IronTableLeg",
+		"NorthBattlement",
+		"NorthWall",
+		"SouthBattlement",
+		"SouthWall",
+	}
+
+	local oldNames = {
+		BackWallTitlePanel = true,
+		BlueArenaFloor = true,
+		EastWall = true,
+		FortressTitlePanel = true,
+		FortressWarTable = true,
+		ObsidianStoneFloor = true,
+		PhysicalBoardBase = true,
+		PlayerCommanderSeat = true,
+		PromptPanel = true,
+		SeatedAICommander = true,
+		SideStrategyTable = true,
+		TablePresentationPlatform = true,
+		WarTablePlatform = true,
+		WestWall = true,
+	}
+
+	for _, child in ipairs(workspace:GetChildren()) do
+		if oldNames[child.Name] then
+			child:Destroy()
+		else
+			for _, prefix in ipairs(oldPrefixes) do
+				if string.sub(child.Name, 1, #prefix) == prefix then
+					child:Destroy()
+					break
+				end
+			end
+		end
+	end
 end
 
 local function addLight(parent, color, brightness, range)
@@ -453,8 +514,8 @@ local function buildWarTable()
 
 	local boardBase = makePart(
 		"PhysicalBoardBase",
-		Vector3.new(13.5, 0.55, 13.5),
-		CFrame.new(center + Vector3.new(0, 1.1, 0)),
+		Vector3.new(GameConfig.boardSize, 0.55, GameConfig.boardSize),
+		CFrame.new(center + GameConfig.boardCenterOffset),
 		Palette.obsidian
 	)
 	boardBase.Material = Enum.Material.SmoothPlastic
@@ -469,7 +530,14 @@ local function buildWarTable()
 			local cell = makePart(
 				("BoardCell%d"):format(index),
 				Vector3.new(3.35, 0.25, 3.35),
-				CFrame.new(center + Vector3.new(startX + (column - 1) * spacing, 1.52, startZ + (row - 1) * spacing)),
+				CFrame.new(
+					center
+						+ Vector3.new(
+							startX + (column - 1) * spacing,
+							GameConfig.boardCellOffsetY,
+							startZ + (row - 1) * spacing
+						)
+				),
 				Palette.deepCrimson,
 				Enum.Material.Neon
 			)
@@ -511,6 +579,7 @@ local function updatePhysicalBoard(board, line, winner)
 	end
 end
 
+removeOldGeneratedParts()
 buildFortressShell()
 buildDecor()
 arrangeCommunityModels()
