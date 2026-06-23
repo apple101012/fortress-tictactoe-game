@@ -47,14 +47,14 @@ local sessions = {}
 local boardCells = {}
 local boardLabels = {}
 
-Lighting.Ambient = Color3.fromRGB(76, 24, 22)
-Lighting.Brightness = 1.8
+Lighting.Ambient = Color3.fromRGB(112, 42, 36)
+Lighting.Brightness = 2.35
 Lighting.ColorShift_Top = Palette.ember
 Lighting.ColorShift_Bottom = Palette.bloodstone
-Lighting.EnvironmentDiffuseScale = 0.35
-Lighting.EnvironmentSpecularScale = 0.6
+Lighting.EnvironmentDiffuseScale = 0.55
+Lighting.EnvironmentSpecularScale = 0.75
 Lighting.GlobalShadows = true
-Lighting.OutdoorAmbient = Palette.obsidian
+Lighting.OutdoorAmbient = Color3.fromRGB(54, 18, 20)
 
 local function makePart(name, size, cframe, color, material)
 	local part = Instance.new("Part")
@@ -308,9 +308,43 @@ local function buildFortressShell()
 		"ObsidianCourtyardFloor",
 		Vector3.new(halfSize * 2.35, 2, halfSize * 2.35),
 		CFrame.new(0, -1, -22),
-		Palette.obsidian
+		Color3.fromRGB(64, 54, 53)
 	)
-	floor.Material = Enum.Material.Slate
+	floor.Material = Enum.Material.Cobblestone
+
+	local runway = makePart(
+		"CrimsonRunway",
+		Vector3.new(18, 0.16, 66),
+		CFrame.new(0, 0.08, -5),
+		Palette.deepCrimson,
+		Enum.Material.Fabric
+	)
+	runway.CanCollide = false
+
+	for _, x in ipairs({ -9.6, 9.6 }) do
+		local trim = makePart(
+			"GoldRunwayTrim",
+			Vector3.new(0.55, 0.2, 66),
+			CFrame.new(x, 0.15, -5),
+			Palette.gold,
+			Enum.Material.Metal
+		)
+		trim.CanCollide = false
+	end
+
+	for index, z in ipairs({ 18, 6, -6, -18, -30 }) do
+		for _, x in ipairs({ -12.5, 12.5 }) do
+			local marker = makePart(
+				("RunwayEmberLight%d"):format(index),
+				Vector3.new(1.8, 0.25, 1.8),
+				CFrame.new(x, 0.3, z),
+				Palette.ember,
+				Enum.Material.Neon
+			)
+			marker.CanCollide = false
+			addLight(marker, Palette.ember, 1.25, 18)
+		end
+	end
 end
 
 local function buildDecor()
@@ -330,117 +364,144 @@ local function arrangeCommunityModels()
 
 	placeModel(
 		getCommunityModel(group, "Medieval Village Set - Castle Town Buildings"),
-		CFrame.new(0, 13, -112) * CFrame.Angles(0, math.rad(180), 0),
+		CFrame.new(0, 13, -72) * CFrame.Angles(0, math.rad(180), 0),
 		0.36
 	)
 	placeModel(
 		getCommunityModel(group, "Medieval Castle Village Fortress Fantasy Building"),
-		CFrame.new(-48, 5, -58) * CFrame.Angles(0, math.rad(28), 0),
+		CFrame.new(-48, 5, -26) * CFrame.Angles(0, math.rad(28), 0),
 		0.92
 	)
 	placeModel(
 		getCommunityModel(group, "Synty Dungeon Pack Cave Castle Medieval Interior"),
-		CFrame.new(76, 9, -42) * CFrame.Angles(0, math.rad(-90), 0),
+		CFrame.new(76, 9, -6) * CFrame.Angles(0, math.rad(-90), 0),
 		0.17
 	)
-	placeModel(getCommunityModel(group, "Castle Wall Medieval Fortress Defense Tower"), CFrame.new(0, 14, -86), 1.25)
+	placeModel(getCommunityModel(group, "Castle Wall Medieval Fortress Defense Tower"), CFrame.new(0, 14, -42), 1.25)
 	placeModel(
 		getCommunityModel(group, "Portcullis Castle Gate Door Medieval Fortress"),
-		CFrame.new(0, 11.5, -73) * CFrame.Angles(0, math.rad(180), 0),
+		CFrame.new(0, 11.5, -32) * CFrame.Angles(0, math.rad(180), 0),
 		1.25
 	)
 	cloneCommunityModel(
 		group,
 		"Castle Wall Medieval Fortress Defense Tower",
 		"Castle Wall Medieval Fortress Defense Tower Left",
-		CFrame.new(-58, 14, -45) * CFrame.Angles(0, math.rad(90), 0),
+		CFrame.new(-42, 14, 0) * CFrame.Angles(0, math.rad(90), 0),
 		0.95
 	)
 	cloneCommunityModel(
 		group,
 		"Castle Wall Medieval Fortress Defense Tower",
 		"Castle Wall Medieval Fortress Defense Tower Right",
-		CFrame.new(58, 14, -45) * CFrame.Angles(0, math.rad(-90), 0),
+		CFrame.new(42, 14, 0) * CFrame.Angles(0, math.rad(-90), 0),
 		0.95
 	)
+	local ornateTable = getCommunityModel(group, "Ornate War Council Table")
+	if ornateTable then
+		placeModelTopAt(ornateTable, CFrame.new(GameConfig.tablePosition), 1.25, GameConfig.tablePosition.Y + 0.35)
+		placeModel(getCommunityModel(group, "WAR MAP TABLE"), CFrame.new(0, -80, 0), 1)
+	else
+		placeModelTopAt(
+			getCommunityModel(group, "WAR MAP TABLE"),
+			CFrame.new(GameConfig.tablePosition),
+			2.05,
+			GameConfig.tablePosition.Y + 0.15
+		)
+	end
 	placeModelTopAt(
 		getCommunityModel(group, "Dungeon Table Medieval Castle Fantasy Decor"),
-		CFrame.new(GameConfig.tablePosition),
-		2.5,
-		GameConfig.tablePosition.Y + 0.15
+		CFrame.new(-20, GameConfig.tablePosition.Y, 5) * CFrame.Angles(0, math.rad(22), 0),
+		1.45,
+		GameConfig.tablePosition.Y - 0.2
 	)
 	placeModel(
 		getCommunityModel(group, "Medieval Chair Throne Castle Roleplay RP"),
-		CFrame.new(0, 2.4, -57) * CFrame.Angles(0, math.rad(180), 0),
+		CFrame.new(0, 2.4, -17) * CFrame.Angles(0, math.rad(180), 0),
 		1.4
 	)
 	placeModel(
 		getCommunityModel(group, "Medieval Furniture Pack Castle Kingdom Vibe RP"),
-		CFrame.new(-21, 2.4, -40) * CFrame.Angles(0, math.rad(35), 0),
+		CFrame.new(-23, 2.4, -1) * CFrame.Angles(0, math.rad(35), 0),
 		1.7
 	)
 	placeModel(
+		getCommunityModel(group, "Large Dinning Set"),
+		CFrame.new(23, 2.5, 1) * CFrame.Angles(0, math.rad(-28), 0),
+		1.1
+	)
+	placeModel(
+		getCommunityModel(group, "King's Throne Royal Regal Castle Throne Room"),
+		CFrame.new(0, 2.8, -21) * CFrame.Angles(0, math.rad(180), 0),
+		1.25
+	)
+	placeModel(
 		getCommunityModel(group, "Statue Sword Knight Armor Medieval Guard"),
-		CFrame.new(-28, 14.5, -52) * CFrame.Angles(0, math.rad(22), 0),
+		CFrame.new(-19, 14.5, -16) * CFrame.Angles(0, math.rad(22), 0),
 		0.82
 	)
 	placeModel(
+		getCommunityModel(group, "Knight NPC Armor Swords Shield Medieval RPG"),
+		CFrame.new(11, 3.1, -13) * CFrame.Angles(0, math.rad(-18), 0),
+		1.35
+	)
+	placeModel(
 		getCommunityModel(group, "Wall Torch Flame Light Medieval Castle Prop"),
-		CFrame.new(-24, 7.5, -74) * CFrame.Angles(0, math.rad(180), 0),
+		CFrame.new(-18, 7.5, -27) * CFrame.Angles(0, math.rad(180), 0),
 		1.4
 	)
-	placeModel(getCommunityModel(group, "Brazier"), CFrame.new(-18, 2.2, -26), 1.35)
+	placeModel(getCommunityModel(group, "Brazier"), CFrame.new(-13, 2.2, 12), 1.35)
 
 	cloneCommunityModel(
 		group,
 		"Statue Sword Knight Armor Medieval Guard",
 		"Statue Sword Knight Armor Medieval Guard Right",
-		CFrame.new(28, 14.5, -52) * CFrame.Angles(0, math.rad(-22), 0),
+		CFrame.new(19, 14.5, -16) * CFrame.Angles(0, math.rad(-22), 0),
 		0.82
 	)
 	cloneCommunityModel(
 		group,
 		"Wall Torch Flame Light Medieval Castle Prop",
 		"Wall Torch Flame Light Medieval Castle Prop Right",
-		CFrame.new(24, 7.5, -74) * CFrame.Angles(0, math.rad(180), 0),
+		CFrame.new(18, 7.5, -27) * CFrame.Angles(0, math.rad(180), 0),
 		1.4
 	)
 	cloneCommunityModel(
 		group,
 		"Wall Torch Flame Light Medieval Castle Prop",
 		"Wall Torch Flame Light Medieval Castle Prop Left Mid",
-		CFrame.new(-46, 7.5, -32) * CFrame.Angles(0, math.rad(90), 0),
+		CFrame.new(-34, 7.5, 12) * CFrame.Angles(0, math.rad(90), 0),
 		1.2
 	)
 	cloneCommunityModel(
 		group,
 		"Wall Torch Flame Light Medieval Castle Prop",
 		"Wall Torch Flame Light Medieval Castle Prop Right Mid",
-		CFrame.new(46, 7.5, -32) * CFrame.Angles(0, math.rad(-90), 0),
+		CFrame.new(34, 7.5, 12) * CFrame.Angles(0, math.rad(-90), 0),
 		1.2
 	)
-	cloneCommunityModel(group, "Brazier", "Brazier Right", CFrame.new(18, 2.2, -26), 1.35)
-	cloneCommunityModel(group, "Brazier", "Brazier Left Rear", CFrame.new(-34, 2.2, -62), 1.2)
-	cloneCommunityModel(group, "Brazier", "Brazier Right Rear", CFrame.new(34, 2.2, -62), 1.2)
+	cloneCommunityModel(group, "Brazier", "Brazier Right", CFrame.new(13, 2.2, 12), 1.35)
+	cloneCommunityModel(group, "Brazier", "Brazier Left Rear", CFrame.new(-28, 2.2, -16), 1.2)
+	cloneCommunityModel(group, "Brazier", "Brazier Right Rear", CFrame.new(28, 2.2, -16), 1.2)
 	cloneCommunityModel(
 		group,
 		"Medieval Chair Throne Castle Roleplay RP",
 		"Player Throne Chair",
-		CFrame.new(0, 2.4, -27),
+		CFrame.new(0, 2.4, 13),
 		1.15
 	)
 	cloneCommunityModel(
 		group,
 		"Medieval Furniture Pack Castle Kingdom Vibe RP",
 		"Medieval Furniture Pack Right Decor",
-		CFrame.new(21, 2.4, -40) * CFrame.Angles(0, math.rad(-35), 0),
+		CFrame.new(23, 2.4, -1) * CFrame.Angles(0, math.rad(-35), 0),
 		1.7
 	)
 	cloneCommunityModel(
 		group,
 		"Medieval Castle Village Fortress Fantasy Building",
 		"Medieval Castle Village Fortress Fantasy Building Right",
-		CFrame.new(48, 5, -58) * CFrame.Angles(0, math.rad(-28), 0),
+		CFrame.new(48, 5, -26) * CFrame.Angles(0, math.rad(-28), 0),
 		0.92
 	)
 
@@ -454,7 +515,11 @@ local function buildWarTable()
 	local center = GameConfig.tablePosition
 	local communityModels = workspace:FindFirstChild("CommunityFortressModels")
 	local communityTable = communityModels
-		and communityModels:FindFirstChild("Dungeon Table Medieval Castle Fantasy Decor")
+		and (
+			communityModels:FindFirstChild("Ornate War Council Table")
+			or communityModels:FindFirstChild("WAR MAP TABLE")
+			or communityModels:FindFirstChild("Dungeon Table Medieval Castle Fantasy Decor")
+		)
 	local promptPart
 
 	if communityTable and communityTable:IsA("Model") then
@@ -467,13 +532,18 @@ local function buildWarTable()
 		end
 
 		if communityTable.ScaleTo then
-			communityTable:ScaleTo(2.5)
+			local tableScale = if communityTable.Name == "Ornate War Council Table"
+				then 1.25
+				elseif communityTable.Name == "WAR MAP TABLE" then 2.05
+				else 2.5
+			communityTable:ScaleTo(tableScale)
 		end
 
 		communityTable:PivotTo(CFrame.new(center.X, center.Y, center.Z))
 
 		local boundsCFrame, boundsSize = communityTable:GetBoundingBox()
-		local desiredTopY = center.Y + 0.15
+		local tableTopOffset = if communityTable.Name == "Ornate War Council Table" then 0.35 else 0.15
+		local desiredTopY = center.Y + tableTopOffset
 		local currentTopY = boundsCFrame.Position.Y + boundsSize.Y / 2
 		communityTable:PivotTo(communityTable:GetPivot() + Vector3.new(0, desiredTopY - currentTopY, 0))
 
@@ -512,6 +582,33 @@ local function buildWarTable()
 
 	addPromptToPart(promptPart)
 
+	local tableShell = makePart(
+		"VisibleWarTableTop",
+		Vector3.new(17.5, 0.55, 12.5),
+		CFrame.new(center + Vector3.new(0, 0.55, 0)),
+		Palette.crimson,
+		Enum.Material.WoodPlanks
+	)
+	addLight(tableShell, Palette.ember, 0.9, 18)
+
+	local frontFascia = makePart(
+		"VisibleWarTableFront",
+		Vector3.new(17.5, 3.8, 0.65),
+		CFrame.new(center + Vector3.new(0, -1.1, 6.45)),
+		Palette.bloodstone,
+		Enum.Material.WoodPlanks
+	)
+	addSurfaceText(frontFascia, Enum.NormalId.Front, "TIC TAC TOE", Palette.gold, Enum.Font.GothamBlack)
+
+	local frontTrim = makePart(
+		"VisibleWarTableGoldTrim",
+		Vector3.new(17.8, 0.35, 0.75),
+		CFrame.new(center + Vector3.new(0, 1.0, 6.5)),
+		Palette.gold,
+		Enum.Material.Metal
+	)
+	frontTrim.CanCollide = false
+
 	local boardBase = makePart(
 		"PhysicalBoardBase",
 		Vector3.new(GameConfig.boardSize, 0.55, GameConfig.boardSize),
@@ -545,6 +642,30 @@ local function buildWarTable()
 			boardLabels[index] = addSurfaceText(cell, Enum.NormalId.Top, "", Palette.bone, Enum.Font.GothamBlack)
 		end
 	end
+
+	local beacon = makePart(
+		"WarTableBeacon",
+		Vector3.new(1.2, 12, 1.2),
+		CFrame.new(center + Vector3.new(0, 9.5, 0)),
+		Palette.ember,
+		Enum.Material.Neon
+	)
+	beacon.Shape = Enum.PartType.Cylinder
+	beacon.Transparency = 0.28
+	beacon.CanCollide = false
+	addLight(beacon, Palette.ember, 2, 30)
+
+	local placard = makePart(
+		"WarTablePlacard",
+		Vector3.new(16, 5, 0.35),
+		CFrame.new(center + Vector3.new(0, 8.4, 5.2)),
+		Palette.bloodstone,
+		Enum.Material.Metal
+	)
+	placard.CanCollide = false
+	addSurfaceText(placard, Enum.NormalId.Front, "WAR TABLE", Palette.gold, Enum.Font.GothamBlack)
+	addSurfaceText(placard, Enum.NormalId.Back, "WAR TABLE", Palette.gold, Enum.Font.GothamBlack)
+	addLight(placard, Palette.gold, 1.1, 24)
 
 	return promptPart
 end

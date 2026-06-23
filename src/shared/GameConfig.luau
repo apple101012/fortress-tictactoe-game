@@ -21,7 +21,7 @@ return {
 	boardCenterOffset = vector3(0, 1.1, 0),
 	boardCellOffsetY = 1.52,
 	boardSize = 13.5,
-	tablePosition = vector3(0, 4.2, -42),
-	spawnPosition = vector3(0, 1.2, 18),
+	tablePosition = vector3(0, 4.2, -2),
+	spawnPosition = vector3(0, 1.2, 22),
 	promptDistance = 18,
 }

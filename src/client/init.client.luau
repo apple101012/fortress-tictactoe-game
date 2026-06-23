@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
@@ -11,6 +12,10 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local leaderstats = player:WaitForChild("leaderstats")
 local gameFunction = ReplicatedStorage:WaitForChild(GameConfig.remoteName)
+
+pcall(function()
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
+end)
 
 local wins = leaderstats:WaitForChild("Wins")
 local streak = leaderstats:WaitForChild("Streak")

@@ -32,12 +32,27 @@ return {
 	{
 		assetId = 109103360492536,
 		name = "Dungeon Table Medieval Castle Fantasy Decor",
+		role = "decor_table",
+	},
+	{
+		assetId = 3387462770,
+		name = "WAR MAP TABLE",
 		role = "table",
 	},
 	{
 		assetId = 99831039581930,
 		name = "Medieval Chair Throne Castle Roleplay RP",
 		role = "throne",
+	},
+	{
+		assetId = 125873774319413,
+		name = "King's Throne Royal Regal Castle Throne Room",
+		role = "throne_room",
+	},
+	{
+		assetId = 245973714,
+		name = "Large Dinning Set",
+		role = "banquet_furniture",
 	},
 	{
 		assetId = 132880752472126,
@@ -53,5 +68,10 @@ return {
 		assetId = 88420072471743,
 		name = "Statue Sword Knight Armor Medieval Guard",
 		role = "guard",
+	},
+	{
+		assetId = 70373023460880,
+		name = "Knight NPC Armor Swords Shield Medieval RPG",
+		role = "ai_commander",
 	},
 }
