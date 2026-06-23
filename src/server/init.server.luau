@@ -425,10 +425,11 @@ local function arrangeCommunityModels()
 		CFrame.new(-23, 2.4, -1) * CFrame.Angles(0, math.rad(35), 0),
 		1.7
 	)
-	placeModel(
+	placeModelTopAt(
 		getCommunityModel(group, "Large Dinning Set"),
-		CFrame.new(23, 2.5, 1) * CFrame.Angles(0, math.rad(-28), 0),
-		1.1
+		CFrame.new(GameConfig.tablePosition) * CFrame.Angles(0, math.rad(180), 0),
+		0.92,
+		GameConfig.tablePosition.Y + 0.1
 	)
 	placeModel(
 		getCommunityModel(group, "King's Throne Royal Regal Castle Throne Room"),
@@ -582,32 +583,109 @@ local function buildWarTable()
 
 	addPromptToPart(promptPart)
 
-	local tableShell = makePart(
-		"VisibleWarTableTop",
-		Vector3.new(17.5, 0.55, 12.5),
-		CFrame.new(center + Vector3.new(0, 0.55, 0)),
-		Palette.crimson,
+	local tableTop = makePart(
+		"PlayableWarTableTop",
+		Vector3.new(21, 0.7, 15),
+		CFrame.new(center + Vector3.new(0, 0, 0)),
+		Color3.fromRGB(138, 76, 42),
 		Enum.Material.WoodPlanks
 	)
-	addLight(tableShell, Palette.ember, 0.9, 18)
+	addLight(tableTop, Palette.ember, 1.35, 24)
 
-	local frontFascia = makePart(
-		"VisibleWarTableFront",
-		Vector3.new(17.5, 3.8, 0.65),
-		CFrame.new(center + Vector3.new(0, -1.1, 6.45)),
+	local tableCloth = makePart(
+		"CrimsonTableCloth",
+		Vector3.new(19, 0.18, 13),
+		CFrame.new(center + Vector3.new(0, 0.45, 0)),
+		Color3.fromRGB(156, 24, 31),
+		Enum.Material.Fabric
+	)
+	tableCloth.CanCollide = false
+
+	for _, offset in ipairs({
+		Vector3.new(-8.5, -1.9, -5.8),
+		Vector3.new(8.5, -1.9, -5.8),
+		Vector3.new(-8.5, -1.9, 5.8),
+		Vector3.new(8.5, -1.9, 5.8),
+	}) do
+		makePart(
+			"PlayableWarTableLeg",
+			Vector3.new(1.4, 3.6, 1.4),
+			CFrame.new(center + offset),
+			Palette.iron,
+			Enum.Material.Metal
+		)
+	end
+
+	local frontApron = makePart(
+		"PlayableWarTableFrontApron",
+		Vector3.new(21, 2.2, 0.65),
+		CFrame.new(center + Vector3.new(0, -1.15, 7.85)),
+		Color3.fromRGB(118, 35, 29),
+		Enum.Material.WoodPlanks
+	)
+	addSurfaceText(frontApron, Enum.NormalId.Front, "TIC TAC TOE", Palette.gold, Enum.Font.GothamBlack)
+
+	for _, offset in ipairs({
+		Vector3.new(0, 0.78, 7.75),
+		Vector3.new(0, 0.78, -7.75),
+		Vector3.new(-10.7, 0.78, 0),
+		Vector3.new(10.7, 0.78, 0),
+	}) do
+		local trimSize = if math.abs(offset.X) > 0 then Vector3.new(0.55, 0.28, 15.5) else Vector3.new(21.5, 0.28, 0.55)
+		local trim = makePart(
+			"PlayableWarTableGoldTrim",
+			trimSize,
+			CFrame.new(center + offset),
+			Palette.gold,
+			Enum.Material.Metal
+		)
+		trim.CanCollide = false
+	end
+
+	local playerSeat = makePart(
+		"PlayerTableChair",
+		Vector3.new(5, 0.7, 4.2),
+		CFrame.new(center + Vector3.new(0, -0.85, 12.5)),
+		Color3.fromRGB(80, 35, 29),
+		Enum.Material.WoodPlanks
+	)
+	local playerBack = makePart(
+		"PlayerTableChairBack",
+		Vector3.new(5, 4.2, 0.65),
+		CFrame.new(center + Vector3.new(0, 1.0, 14.35)),
 		Palette.bloodstone,
 		Enum.Material.WoodPlanks
 	)
-	addSurfaceText(frontFascia, Enum.NormalId.Front, "TIC TAC TOE", Palette.gold, Enum.Font.GothamBlack)
+	addLight(playerSeat, Palette.ember, 0.45, 12)
+	addLight(playerBack, Palette.ember, 0.35, 10)
 
-	local frontTrim = makePart(
-		"VisibleWarTableGoldTrim",
-		Vector3.new(17.8, 0.35, 0.75),
-		CFrame.new(center + Vector3.new(0, 1.0, 6.5)),
-		Palette.gold,
-		Enum.Material.Metal
+	local aiSeat = makePart(
+		"AITableChair",
+		Vector3.new(5, 0.7, 4.2),
+		CFrame.new(center + Vector3.new(0, -0.85, -12.5)),
+		Color3.fromRGB(80, 35, 29),
+		Enum.Material.WoodPlanks
 	)
-	frontTrim.CanCollide = false
+	local aiBack = makePart(
+		"AITableChairBack",
+		Vector3.new(5, 4.2, 0.65),
+		CFrame.new(center + Vector3.new(0, 1.0, -14.35)),
+		Palette.bloodstone,
+		Enum.Material.WoodPlanks
+	)
+	addLight(aiSeat, Palette.ember, 0.45, 12)
+	addLight(aiBack, Palette.ember, 0.35, 10)
+
+	local tableSpotlight = makePart(
+		"WarTableSpotlight",
+		Vector3.new(1, 1, 1),
+		CFrame.new(center + Vector3.new(0, 7.5, 0)),
+		Palette.gold,
+		Enum.Material.Neon
+	)
+	tableSpotlight.Transparency = 1
+	tableSpotlight.CanCollide = false
+	addLight(tableSpotlight, Palette.gold, 2.1, 34)
 
 	local boardBase = makePart(
 		"PhysicalBoardBase",
@@ -645,27 +723,15 @@ local function buildWarTable()
 
 	local beacon = makePart(
 		"WarTableBeacon",
-		Vector3.new(1.2, 12, 1.2),
-		CFrame.new(center + Vector3.new(0, 9.5, 0)),
+		Vector3.new(0.75, 5.5, 0.75),
+		CFrame.new(center + Vector3.new(0, 5.5, 0)),
 		Palette.ember,
 		Enum.Material.Neon
 	)
 	beacon.Shape = Enum.PartType.Cylinder
-	beacon.Transparency = 0.28
+	beacon.Transparency = 0.42
 	beacon.CanCollide = false
-	addLight(beacon, Palette.ember, 2, 30)
-
-	local placard = makePart(
-		"WarTablePlacard",
-		Vector3.new(16, 5, 0.35),
-		CFrame.new(center + Vector3.new(0, 8.4, 5.2)),
-		Palette.bloodstone,
-		Enum.Material.Metal
-	)
-	placard.CanCollide = false
-	addSurfaceText(placard, Enum.NormalId.Front, "WAR TABLE", Palette.gold, Enum.Font.GothamBlack)
-	addSurfaceText(placard, Enum.NormalId.Back, "WAR TABLE", Palette.gold, Enum.Font.GothamBlack)
-	addLight(placard, Palette.gold, 1.1, 24)
+	addLight(beacon, Palette.ember, 1.4, 20)
 
 	return promptPart
 end
