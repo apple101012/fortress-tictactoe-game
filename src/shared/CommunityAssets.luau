@@ -55,6 +55,21 @@ return {
 		role = "banquet_furniture",
 	},
 	{
+		assetId = 82685294678127,
+		name = "Medieval Furniture Set Table Chair Decor",
+		role = "creator_store_furniture_set",
+	},
+	{
+		assetId = 81423349084626,
+		name = "Wooden Table Medieval Furniture Dining Feast",
+		role = "creator_store_table",
+	},
+	{
+		assetId = 103479883718201,
+		name = "Old Wooden Chair Classic Rustic Furniture Farmhou",
+		role = "creator_store_chair",
+	},
+	{
 		assetId = 132880752472126,
 		name = "Wall Torch Flame Light Medieval Castle Prop",
 		role = "torch",

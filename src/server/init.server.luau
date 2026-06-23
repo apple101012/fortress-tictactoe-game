@@ -47,14 +47,28 @@ local sessions = {}
 local boardCells = {}
 local boardLabels = {}
 
-Lighting.Ambient = Color3.fromRGB(112, 42, 36)
-Lighting.Brightness = 2.35
-Lighting.ColorShift_Top = Palette.ember
-Lighting.ColorShift_Bottom = Palette.bloodstone
-Lighting.EnvironmentDiffuseScale = 0.55
-Lighting.EnvironmentSpecularScale = 0.75
+Lighting.Ambient = Color3.fromRGB(178, 210, 255)
+Lighting.Brightness = 3.45
+Lighting.ClockTime = 13.5
+Lighting.ColorShift_Top = Color3.fromRGB(205, 228, 255)
+Lighting.ColorShift_Bottom = Color3.fromRGB(124, 171, 224)
+Lighting.EnvironmentDiffuseScale = 0.82
+Lighting.EnvironmentSpecularScale = 0.85
 Lighting.GlobalShadows = true
-Lighting.OutdoorAmbient = Color3.fromRGB(54, 18, 20)
+Lighting.OutdoorAmbient = Color3.fromRGB(142, 185, 235)
+
+local existingSky = Lighting:FindFirstChild("BrightBlueGameSky")
+if not existingSky then
+	existingSky = Instance.new("Sky")
+	existingSky.Name = "BrightBlueGameSky"
+	existingSky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
+	existingSky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
+	existingSky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
+	existingSky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
+	existingSky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
+	existingSky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
+	existingSky.Parent = Lighting
+end
 
 local function makePart(name, size, cframe, color, material)
 	local part = Instance.new("Part")
@@ -426,10 +440,22 @@ local function arrangeCommunityModels()
 		1.7
 	)
 	placeModelTopAt(
-		getCommunityModel(group, "Large Dinning Set"),
+		getCommunityModel(group, "Medieval Furniture Set Table Chair Decor"),
+		CFrame.new(22, GameConfig.tablePosition.Y, 4) * CFrame.Angles(0, math.rad(-28), 0),
+		0.55,
+		GameConfig.tablePosition.Y + 0.15
+	)
+	placeModelTopAt(
+		getCommunityModel(group, "Wooden Table Medieval Furniture Dining Feast"),
 		CFrame.new(GameConfig.tablePosition) * CFrame.Angles(0, math.rad(180), 0),
-		0.92,
+		1.35,
 		GameConfig.tablePosition.Y + 0.1
+	)
+	placeModelTopAt(
+		getCommunityModel(group, "Large Dinning Set"),
+		CFrame.new(25, GameConfig.tablePosition.Y, 1) * CFrame.Angles(0, math.rad(-28), 0),
+		0.82,
+		GameConfig.tablePosition.Y
 	)
 	placeModel(
 		getCommunityModel(group, "King's Throne Royal Regal Castle Throne Room"),
@@ -490,6 +516,19 @@ local function arrangeCommunityModels()
 		"Player Throne Chair",
 		CFrame.new(0, 2.4, 13),
 		1.15
+	)
+	placeModelTopAt(
+		getCommunityModel(group, "Old Wooden Chair Classic Rustic Furniture Farmhou"),
+		CFrame.new(0, GameConfig.tablePosition.Y, 12.8),
+		1.55,
+		GameConfig.tablePosition.Y - 0.35
+	)
+	cloneCommunityModel(
+		group,
+		"Old Wooden Chair Classic Rustic Furniture Farmhou",
+		"Creator Store AI Chair",
+		CFrame.new(0, GameConfig.tablePosition.Y, -12.8) * CFrame.Angles(0, math.rad(180), 0),
+		1.55
 	)
 	cloneCommunityModel(
 		group,
